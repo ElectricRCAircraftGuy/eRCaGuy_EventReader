@@ -45,23 +45,23 @@ References:
 #include "eRCaGuy_EventReader.h"
 
 //define class constants
-const int8_t eRCaGuy_EventReader::PRESSED_ACTION = 1;
-const int8_t eRCaGuy_EventReader::RELEASED_ACTION = -1;
+const int8_t eRCaGuy_EventReader::NO_ACTION = 0;
+const int8_t eRCaGuy_EventReader::ACTION_OCCURRED = 1;
+const int8_t eRCaGuy_EventReader::ACTION_UNOCCURRED = -1;
 
 //define class constructor method
-eRCaGuy_EventReader::eRCaGuy_EventReader(uint8_t buttonPin,unsigned int debounceDelay,boolean pinStateWhenButtonPressed)
+eRCaGuy_EventReader::eRCaGuy_EventReader(unsigned int debounceDelay, bool eventStateWhenEventOccurs)
 {
-  //initialize _BUTTON_PRESSED and _BUTTON_NOT_PRESSED member variables
-  setPinStateWhenButtonPressed(pinStateWhenButtonPressed);
+  //initialize _EVENT_OCCURRING and _EVENT_NOT_OCCURRING member variables
+  setEventStateWhenEventOccurs(eventStateWhenEventOccurs);
 	
   //initialize member variables
-  _buttonPin = buttonPin;
   _debounceDelay = debounceDelay;
-	//for readButton method
-	_lastBounceTime = 0; //ms; the last time the button bounced (ie: the time stamp when the digital reading value last changed)
-	_reading_old = digitalRead(_buttonPin); //the previous reading; initialize as the first reading when instantiating an object
-	_buttonState = _BUTTON_NOT_PRESSED; //the current, actual, NOT bouncing button state; initialize as BUTTON_NOT_PRESSED
-	_buttonState_old = _BUTTON_NOT_PRESSED; //the previous, actual, NOT bouncing button state; initialize as BUTTON_NOT_PRESSED, so that we start out looking for a button press, NOT a button release
+	//for readEvent method
+	_lastBounceTime = 0; //ms; the last time the event state bounced (ie: the time stamp when the eventState last changed)
+	_eventStateOld = !eventStateWhenEventOccurs; //the previous event state; initialize as though no event was occurring last time 
+	_debouncedState = _EVENT_NOT_OCCURRING; //the current, actual, NOT bouncing event state; initialize as _EVENT_NOT_OCCURRING
+	_debouncedStateOld = _EVENT_NOT_OCCURRING; //the previous, actual, NOT bouncing event state; initialize as _EVENT_NOT_OCCURRING, so that we start out looking for an ACTION_OCCURRED, NOT an ACTION_UNOCCURRED
 }
 
 //define other class methods (functions)
@@ -71,37 +71,19 @@ eRCaGuy_EventReader::eRCaGuy_EventReader(uint8_t buttonPin,unsigned int debounce
 //------------------------------------------------------------------------------------------------------
 void eRCaGuy_EventReader::setDebounceDelay(unsigned int debounceDelay)
 {
-  _debounceDelay = debounceDelay; //ms; the minimum time that the value of the button (or switch) must *not* change in order to be considered the new, *true*, NOT bouncing state of the button
+  _debounceDelay = debounceDelay; //ms; the minimum time that the value of the event must *not* change in order to be considered the new, *true*, NOT bouncing state of the event
 }
 
 //------------------------------------------------------------------------------------------------------
-//setButtonPin
+//setEventStateWhenEventOccurs(0 or 1)
+//-This specifies whether the event state will be 0 or 1 when the event is occurring
+//--ex: if using a pull-up resistor on a button or switch, the event state will be LOW when the button is pressed
+//--if using a pull-down resistor on a button or switch, the event state will be HIGH when the button is pressed
 //------------------------------------------------------------------------------------------------------
-void eRCaGuy_EventReader::setButtonPin(uint8_t buttonPin)
+void eRCaGuy_EventReader::setEventStateWhenEventOccurs(bool eventStateWhenEventOccurs)
 {
-  _buttonPin = buttonPin;
-}
-
-//------------------------------------------------------------------------------------------------------
-//setPinStateWhenButtonPressed(HIGH or LOW)
-//-This specifies whether the pin state of the buttonPin will be HIGH or LOW when the button is pressed
-//--if using a pull-up resistor on the button or switch, the pin state will be LOW when the button is pressed
-//--if using a pull-down resistor on the button or switch, the pin state will be HIGH when the button is pressed
-//------------------------------------------------------------------------------------------------------
-void eRCaGuy_EventReader::setPinStateWhenButtonPressed(boolean pinStateWhenButtonPressed)
-{
-  if (pinStateWhenButtonPressed==LOW)
-  {
-    //the following is true when using a pull-down resistor on the button
-	_BUTTON_PRESSED = LOW;
-	_BUTTON_NOT_PRESSED = HIGH;
-  }
-  else //pinStateWhenButtonPressed==HIGH
-  {
-    //the following is true when using a pull-up resistor on the button
-	_BUTTON_PRESSED = HIGH;
-	_BUTTON_NOT_PRESSED = LOW;
-  }
+  _EVENT_OCCURRING = eventStateWhenEventOccurs;
+  _EVENT_NOT_OCCURRING = !eventStateWhenEventOccurs;
 }
 
 //------------------------------------------------------------------------------------------------------
@@ -109,58 +91,62 @@ void eRCaGuy_EventReader::setPinStateWhenButtonPressed(boolean pinStateWhenButto
 //------------------------------------------------------------------------------------------------------
 unsigned int eRCaGuy_EventReader::getDebounceDelay()
 {
-  return _debounceDelay; //ms; return the _debounceDelay variable in ms
+  return _debounceDelay; //ms
 }
 
 //------------------------------------------------------------------------------------------------------
-//readButton
+//getEventStateWhenEventOccurs
 //------------------------------------------------------------------------------------------------------
-//read the button action, and store it into the button_action input variable; and read the button state, & store it into the button_state input variable
-//The button state can be 0 or 1, for LOW or HIGH, respectively
-//Button action indicates what just happened to the button: 
-//	0 = no-change in true, debounced button state, or debounceDelay time not yet elapsed <--*perhaps* in the future, output a 3 to indicate 
-//		debounceDelay time not yet elapsed
-//	1 = button was just *pressed* by a human operator (debounceDelay had elapsed)
-// -1 = button was just *released* by a human operator (debounceDelay had elapsed)
-void eRCaGuy_EventReader::readButton(int8_t* button_action, boolean* button_state)
+bool eRCaGuy_EventReader::getEventStateWhenEventOccurs()
 {
-  int8_t buttonAction = 0; //indicates what just happened to the button: 0 = no-change in button state, or debounceDelay time not yet elapsed <--*perhaps* in the future, output a 3 to indicate debounceDelay time not yet elapsed
-                           //                                            1 = button was just pressed by a human operator (debounceDelay had elapsed)
-                           //                                           -1 = button was just released by a human operator (debounceDelay had elapsed)
+  return _EVENT_OCCURRING; 
+}
+
+//------------------------------------------------------------------------------------------------------
+//readEvent
+/*
+Read the event action, and store it into the debouncedAction variable; and read the event state, & store it into the debouncedState variable
+-The event state can be 0 or 1
+-event action indicates what just happened to the event: 
+  0 = NO_ACTION: no change in true, debounced event state since last time interpreting the event, or debounceDelay time not yet elapsed <--*perhaps* in the future, output a 3 to indicate debounceDelay time not yet elapsed
+  1 = ACTION_OCCURRED: a new event just occurred (debounceDelay had elapsed)
+ -1 = ACTION_UNOCCURRED: event just "un-occurred" by going back to its resting state (debounceDelay had elapsed)
+*/
+//------------------------------------------------------------------------------------------------------
+void eRCaGuy_EventReader::readEvent(bool eventState, int8_t *debouncedAction, boolean* debouncedState)
+{
+  int8_t action = NO_ACTION;
+  
   //0) Update _lastBounceTime each time a bounce occurs
-  unsigned int reading = digitalRead(_buttonPin); //get a new reading
-  if (reading != _reading_old) //check to see if the *bouncing* button state has changed
+  if (eventState != _eventStateOld) //check to see if the *bouncing* event state has changed
   {
-    _reading_old = reading; //update
-    _lastBounceTime = millis();
+    _eventStateOld = eventState; //update
+    _lastBounceTime = millis(); //ms; update 
   }
-  //1) Only conclude that the button is at its actual (not bouncing) button state if the debounceDelay has elapsed, as this means
-  //   that the button is now resting in its final, NOT bouncing condition.
+  //1) Only conclude that the eventState is at its actual (not bouncing) state if the debounceDelay has elapsed, as this means that the event state is now resting in its final, NOT bouncing condition.
   if (millis() - _lastBounceTime > _debounceDelay) //if the debounce time has elapsed
   {
-    //since the debounceDelay has elapsed, this means the reading is no longer changing, which means bouncing is no longer occurring,
-    //which means that the current reading is the actual, new, NOT bouncing button state
-    _buttonState = reading; //store the actual, NOT bouncing button state
-    //2) Check to see if the *actual, NOT bouncing* button state has CHANGED
-    if (_buttonState != _buttonState_old) //if the actual, NOT bouncing button state has changed
+    //since the debounceDelay has elapsed, this means the eventState is no longer changing, which means bouncing is no longer occurring,
+    //which means that the current eventState is the actual, new, NOT bouncing event state
+    _debouncedState = eventState; //store the actual, NOT bouncing even state
+    //2) Check to see if the *actual, NOT bouncing* event state has CHANGED
+    if (_debouncedState != _debouncedStateOld) //if the actual, NOT bouncing event state has changed
     {
-      //3) Since we know that the press was by a human, and not noise (since the debounceDelay has occurred), and since we know the button state has
-      //   CHANGED, meaning that the button isn't just sitting constant in a pressed or released state, let's check to see if the button is PRESSED,
-      //   or UN-PRESSED/RELEASED, then act on the side of the action that we see fit
-      if (_buttonState==_BUTTON_PRESSED) //if a button press is detected
+      //3) Since we know that the event is real (debounced), and not noise (since the debounceDelay has occurred), and since we know the event state has CHANGED, meaning that the event isn't just sitting constant in an _EVENT_OCCURRING or _EVENT_NOT_OCCURRING *state*, let's check to see if the event action is ACTION_OCCURRED or ACTION_UNOCCURRED, then the user can act on the side of the action that he/she sees fit
+      if (_debouncedState==_EVENT_OCCURRING)
       {
-        buttonAction = 1; //button just pressed by a human operator (debounceDelay had elapsed)
+        action = ACTION_OCCURRED; //event action just took place (and debounceDelay had elapsed)
       }
-      else //_buttonState==_BUTTON_NOT_PRESSED
+      else //_debouncedState==_EVENT_NOT_OCCURRING
       {
-        buttonAction = -1; //button was just released by a human operator (debounceDelay had elapsed)
+        action = ACTION_UNOCCURRED; //event just went back to its normal, resting condition (and debounceDelay had elapsed)
       }
     } //end of checking to see if the button state has CHANGED
-    _buttonState_old = _buttonState; //update the old button state
-  } //end of Button debouncing & Output Toggle code
+    _debouncedStateOld = _debouncedState; //update the old button state
+  } //end of Button debouncing
   
   //update the output variables, via the pointers passed in to the function
-  *button_action = buttonAction;
-  *button_state = _buttonState;
+  *debouncedAction = action;
+  *debouncedState = _debouncedState;
 }
 

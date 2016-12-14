@@ -1,4 +1,5 @@
 /*
+/////////////////////////////UPDATE COMMENTS///////////////
 readButton.ino
 -This code differs from readButtonVerbose.ino ONLY in that it does not output the button status every 0.5 seconds; rather, it only outputs the button status when a 
  button *press* or *release* is detected. 
@@ -6,7 +7,7 @@ eRCaGuy_ButtonReader example
 By Gabriel Staples
 http://electricrcaircraftguy.blogspot.com/
 Written: 31 May 2014
-Updated: 31 Oct. 2014
+Updated: 13 Dec 2016 
 
 Library webpage: http://electricrcaircraftguy.blogspot.com/2014/05/ercaguybuttonreader-library-for-arduino.html
 -I wanted a simple and universal, yet very powerful & reliable library to read a button or switch in such a way that I can
@@ -31,11 +32,11 @@ Upload the code, open the serial monitor, and play around pressing, releasing, a
 */
 
 //include the library
-#include <eRCaGuy_ButtonReader.h>
+#include <eRCaGuy_EventReader.h>
 
 //Global Constants:
 //Pins:
-const byte buttonPin = 5; //the number of the pushbutton pin
+const byte buttonPin = 8; //the number of the pushbutton pin
 const byte ledPin = 13; // the number of the LED pin
 //Define Button States:
 const boolean BUTTON_PRESSED = LOW; //if using a pull-up resistor (ex: INPUT_PULLUP) on your button, the buttonPin will be LOW when the button is pressed; 
@@ -43,7 +44,7 @@ const boolean BUTTON_NOT_PRESSED = HIGH; //if using a pull-up resistor (ex: INPU
 
 //instantiate an object of this library class; call it "button1"
 //if not explicitly stated, debounceDelay defaults to 50ms, and the _BUTTON_PRESSED value in the library defaults to LOW; see .h file for details
-eRCaGuy_ButtonReader button1(buttonPin); //object instantiation
+eRCaGuy_EventReader button1(50, BUTTON_PRESSED); //object instantiation
 //alternatively, the object instantiation could be explicit, as follows:
 //eRCaGuy_ButtonReader button1(buttonPin,50,BUTTON_PRESSED); //note: the 50 here is the debounce delay in ms; increase if you get jitter on the button
 
@@ -53,7 +54,7 @@ void setup()
   Serial.println(F("demo"));
   
   //configure pins
-  pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(buttonPin, INPUT);
   pinMode(ledPin, OUTPUT);
 
   // set initial LED state to OFF
@@ -79,10 +80,11 @@ void loop()
     //	0 = no-change in true, debounced button state since last time reading the button, or debounceDelay time not yet elapsed
     //	1 = button was just pressed by a human operator (debounceDelay had elapsed)
     // -1 = button was just released by a human operator (debounceDelay had elapsed)
-  button1.readButton(&button_action,&button_state);
+  byte buttonState = digitalRead(buttonPin);
+  button1.readEvent(buttonState, &button_action, &button_state);
   
   //output data if a button press or release was detected, & toggle LED 13 on button *presses* only
-  if (button_action != 0) //if an action has occured on the button
+  if (button_action != 0) //if an action has occurred on the button
   {
     Serial.print("button_action = "); Serial.print(button_action); Serial.print(", "); 
     if (button_action==1)
@@ -118,24 +120,23 @@ void loop()
   }
 
   //THE BELOW SEGMENT OF CODE IS COMMENTED OUT FOR readButton.ino, but NOT for readButtonVerbose.ino
-//  else //button_action==0
-//  {
-//    //if there is no new action on the button, let's print out the button_state every 0.5 seconds, to see whether the button is currently NOT being pressed, 
-//    //or whether it is being held down continuously
-//    static unsigned long t_start = millis(); //ms; a time stamp to ensure printouts only happen every 0.5 seconds
-//    if (millis() - t_start >= 500) //if 500ms (0.5 sec) has elapsed
-//    {
-//      t_start = millis(); //ms; update
-//      if (button_state==BUTTON_PRESSED)
-//      {
-//        Serial.println("button is being held down");
-//      }
-//      else //button_state==BUTTON_NOT_PRESSED
-//      {
-//        Serial.println("button is just sitting there, NOT pressed");
-//      }
-//    }
-//  }
+ else //button_action==0
+ {
+   //if there is no new action on the button, let's print out the button_state every 0.5 seconds, to see whether the button is currently NOT being pressed, or whether it is being held down continuously
+   static unsigned long t_start = millis(); //ms; a time stamp to ensure printouts only happen every 0.5 seconds
+   if (millis() - t_start >= 500) //if 500ms (0.5 sec) has elapsed
+   {
+     t_start = millis(); //ms; update
+     if (button_state==BUTTON_PRESSED)
+     {
+       Serial.println("button is being held down");
+     }
+     else //button_state==BUTTON_NOT_PRESSED
+     {
+       Serial.println("button is just sitting there, NOT pressed");
+     }
+   }
+ }
 } //end of loop()
 
 //Here you will do something useful, determined by the press or release of the button; I am simply toggling led 13 on and off in order 

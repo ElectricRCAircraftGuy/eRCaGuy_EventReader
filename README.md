@@ -1,7 +1,11 @@
 ##Readme for eRCaGuy_ButtonReader  
 By Gabriel Staples  
 Readme Written: 31 May 2014  
-Readme Last updated: 4 Aug. 2015  
+Readme Last updated: 13 Dec 2016
+
+#SEE HEADER FILE FOR NEW INFO AND DETAILS
+
+================
 
 **Readme Update History (newest on top)**  
 -20150804: updated links, instructions, & license info

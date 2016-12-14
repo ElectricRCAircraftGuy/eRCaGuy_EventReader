@@ -16,15 +16,10 @@ ButtonReader Library webpage: http://www.electricrcaircraftguy.com/2014/05/ercag
  EventReader Started: 13 Dec 2016 
  EventReader Last Updated: 13 Dec 2016 
  
- Version (newest on top): 
- 2.0 - eRCaGuy_EventReader...
- 1.1 - fixed bug which prevented multiple buttons from working - eRCaGuy_ButtonReader
- 1.0 - first release of eRCaGuy_ButtonReader
- 
- History (newest on top):
- 20161213 - 
- 20141031 - V1.1 release; fixed major bug which prevented multiple buttons from working - eRCaGuy_ButtonReader
- 20140531 - V1.0 release; first version created - eRCaGuy_ButtonReader
+ Version History (newest on top):
+ 20161213 - v2.0.0 released (first version now called eRCaGuy_EventReader instead of eRCaGuy_ButtonReader); this is a major overhaul and upgrade! This version is now capable of debouncing *any* event instead of just digitalRead inputs on buttons. This means that you can interpret and debounce capacitive touch buttons, or ladders of buttons read as different voltage values on a single analog pin, for instance. This is now possible because instead of letting the library read the button via digitalRead, you just pass in the current button or event state as a 0 or 1 to the library, via the "readEvent" method, and let it interpret and debounce it for you. 
+ 20141031 - v1.1 release; fixed major bug in eRCaGuy_ButtonReader which prevented reading multiple buttons simultaneously from working
+ 20140531 - v1.0 release; first release of eRCaGuy_ButtonReader
  
  Credits:
  1) This file was created and edited in Notepad++ (http://notepad-plus-plus.org/)
@@ -78,41 +73,47 @@ class eRCaGuy_EventReader
 {
   public:
     //declare class constructor method
-    eRCaGuy_EventReader(bool eventState, unsigned int debounceDelay = 50); //default debounceDelay, if not specified, is this value here 
+    eRCaGuy_EventReader(unsigned int debounceDelay = 50, bool eventStateWhenEventOccurs = 1); //default debounceDelay, if not specified, is this value here 
 	
-		//declare other public class methods (functions)
+		//set functions 
 		
-		//function to set the debounceDelay time (in ms)
+		//set the debounceDelay time (in ms)
 		void setDebounceDelay(unsigned int debounceDelay = 50); //default is 50ms
-		
-		//function to find out what the current debounceDelay is set to
+		//set whether the event is considered to be occurring when the state is HIGH (1) or LOW (0)
+		void setEventStateWhenEventOccurs(bool eventStateWhenEventOccurs = 1);
+    
+    //get functions 
+    
+		//get the current debounceDelay value 
 		unsigned int getDebounceDelay();
+    bool getEventStateWhenEventOccurs();
 		
-		//read the event action, and store it into the eventAction variable; and read the button state, & store it into the button_state variable
-		//The button state can be 0 or 1, for LOW or HIGH, respectively
-		// button action indicates what just happened to the button: 
-		//	0 = no-change in true, debounced button state since last time reading the button, or debounceDelay time not yet elapsed <--*perhaps* in the future, output a 3 to indicate debounceDelay time not yet elapsed
-		//	1 = button was just pressed by a human operator (debounceDelay had elapsed)
-			// -1 = button was just released by a human operator (debounceDelay had elapsed)
-		void readButton(int8_t* eventAction, boolean* button_state);
-		
-		//Public class constants
-		static const int8_t PRESSED_ACTION, RELEASED_ACTION;
-		
-									   
+		/*
+    Read the event action, and store it into the debouncedAction variable; and read the event state, & store it into the debouncedState variable
+		-The event state can be 0 or 1
+		-event action indicates what just happened to the event: 
+		  0 = NO_ACTION: no change in true, debounced event state since last time interpreting the event, or debounceDelay time not yet elapsed <--*perhaps* in the future, output a 3 to indicate debounceDelay time not yet elapsed
+		  1 = ACTION_OCCURRED: a new event just occurred (debounceDelay had elapsed)
+	   -1 = ACTION_UNOCCURRED: event just "un-occurred" by going back to its resting state (debounceDelay had elapsed)
+		*/
+    void readEvent(bool eventState, int8_t *debouncedAction, boolean *debouncedState);
+    
+		//Public class constants to define ACTIONS (defined in .cpp file)
+		static const int8_t NO_ACTION, ACTION_OCCURRED, ACTION_UNOCCURRED;
+    
   private:
 		//declare private class methods (functions)
 		//N/A
 	  //variables accessible by this class only
-		uint8_t _buttonPin;
 		unsigned int _debounceDelay;
-		boolean _BUTTON_PRESSED;
-		boolean _BUTTON_NOT_PRESSED;
-		//for readButton method
+    //Event states:
+		bool _EVENT_OCCURRING;
+		bool _EVENT_NOT_OCCURRING;
+		//for readEvent method
 		unsigned long _lastBounceTime;
-		unsigned int _reading_old;
-		boolean _buttonState;
-		boolean _buttonState_old;
+		unsigned int _eventStateOld;
+		boolean _debouncedState;
+		boolean _debouncedStateOld;
 };
 
 #endif
