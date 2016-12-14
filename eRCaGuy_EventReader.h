@@ -1,6 +1,8 @@
 /*
-eRCaGuy_ButtonReader
-Library webpage: http://www.electricrcaircraftguy.com/2014/05/ercaguybuttonreader-library-for-arduino.html
+eRCaGuy_EventReader
+-a continuation of eRCaGuy_ButtonReader
+
+ButtonReader Library webpage: http://www.electricrcaircraftguy.com/2014/05/ercaguybuttonreader-library-for-arduino.html
 -I wanted a simple and universal, yet very powerful & reliable library to read a button or switch in such a way that I can
  easily implement toggled actions and momentary actions, know the true, debounced state of a button or switch at any given time, 
  and specify whether I want an action to take place when the button is *pressed* or *released.*  This library makes implementing all of
@@ -9,16 +11,20 @@ Library webpage: http://www.electricrcaircraftguy.com/2014/05/ercaguybuttonreade
  By Gabriel Staples
  http://www.ElectricRCAircraftGuy.com
  -My contact info is available by clicking the "Contact Me" tab at the top of my blog.
- Written: 30 May 2014
- Last Updated: 31 Oct 2014
+ ButtonReader Written: 30 May 2014
+ ButtonReader Last Updated: 31 Oct 2014
+ EventReader Started: 13 Dec 2016 
+ EventReader Last Updated: 13 Dec 2016 
  
  Version (newest on top): 
- 1.1 - fixed bug which prevented multiple buttons from working
- 1.0 - first release
+ 2.0 - eRCaGuy_EventReader...
+ 1.1 - fixed bug which prevented multiple buttons from working - eRCaGuy_ButtonReader
+ 1.0 - first release of eRCaGuy_ButtonReader
  
  History (newest on top):
- 20141031 - V1.1 release; fixed major bug which prevented multiple buttons from working
- 20140531 - V1.0 release; first version created
+ 20161213 - 
+ 20141031 - V1.1 release; fixed major bug which prevented multiple buttons from working - eRCaGuy_ButtonReader
+ 20140531 - V1.0 release; first version created - eRCaGuy_ButtonReader
  
  Credits:
  1) This file was created and edited in Notepad++ (http://notepad-plus-plus.org/)
@@ -33,9 +39,9 @@ Library webpage: http://www.electricrcaircraftguy.com/2014/05/ercaguybuttonreade
 /*
 ===================================================================================================
   LICENSE & DISCLAIMER
-  Copyright (C) 2014 Gabriel Staples.  All right reserved.
+  Copyright (C) 2014-2016 Gabriel Staples.  All right reserved.
   
-  This file is part of eRCaGuy_ButtonReader.
+  This file is part of eRCaGuy_EventReader.
   
   I AM WILLING TO DUAL-LICENSE THIS SOFTWARE. HOWEVER, UNLESS YOU HAVE PAID FOR AND RECEIVED A RECEIPT
   FOR AN ALTERNATE LICENSE AGREEMENT, FROM ME, THE COPYRIGHT OWNER, THIS SOFTWARE IS LICENSED AS FOLLOWS: 
@@ -59,8 +65,8 @@ Library webpage: http://www.electricrcaircraftguy.com/2014/05/ercaguybuttonreade
 ===================================================================================================
 */
 
-#ifndef eRCaGuy_ButtonReader_h
-#define eRCaGuy_ButtonReader_h
+#ifndef eRCaGuy_EventReader_h
+#define eRCaGuy_EventReader_h
 
 #if ARDUINO >= 100
  #include <Arduino.h>
@@ -68,33 +74,27 @@ Library webpage: http://www.electricrcaircraftguy.com/2014/05/ercaguybuttonreade
  #include <WProgram.h>
 #endif
 
-class eRCaGuy_ButtonReader
+class eRCaGuy_EventReader
 {
   public:
     //declare class constructor method
-    eRCaGuy_ButtonReader(uint8_t buttonPin,unsigned int debounceDelay = 50,boolean pinStateWhenButtonPressed = LOW); //default debounceDelay, if not specified, is 50ms; the default state of the pin when the button is pressed is LOW (this is valid when using a pull-up resistor on the pin)
+    eRCaGuy_EventReader(bool eventState, unsigned int debounceDelay = 50); //default debounceDelay, if not specified, is this value here 
 	
 		//declare other public class methods (functions)
 		
 		//function to set the debounceDelay time (in ms)
 		void setDebounceDelay(unsigned int debounceDelay = 50); //default is 50ms
 		
-		//function to set or change the pin the button is connected to
-		void setButtonPin(uint8_t buttonPin); 
-		
-		//function to specify whether the button is considered pressed when the buttonPin is HIGH or LOW
-		void setPinStateWhenButtonPressed(boolean pinStateWhenButtonPressed = LOW); //the default is that the button is considered pressed when the buttonPin is LOW (this is valid when using a pull-up resistor on the pin)
-		
 		//function to find out what the current debounceDelay is set to
 		unsigned int getDebounceDelay();
 		
-		//read the button action, and store it into the button_action variable; and read the button state, & store it into the button_state variable
+		//read the event action, and store it into the eventAction variable; and read the button state, & store it into the button_state variable
 		//The button state can be 0 or 1, for LOW or HIGH, respectively
 		// button action indicates what just happened to the button: 
 		//	0 = no-change in true, debounced button state since last time reading the button, or debounceDelay time not yet elapsed <--*perhaps* in the future, output a 3 to indicate debounceDelay time not yet elapsed
 		//	1 = button was just pressed by a human operator (debounceDelay had elapsed)
 			// -1 = button was just released by a human operator (debounceDelay had elapsed)
-		void readButton(int8_t* button_action, boolean* button_state);
+		void readButton(int8_t* eventAction, boolean* button_state);
 		
 		//Public class constants
 		static const int8_t PRESSED_ACTION, RELEASED_ACTION;
