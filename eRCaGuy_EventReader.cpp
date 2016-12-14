@@ -60,7 +60,8 @@ eRCaGuy_EventReader::eRCaGuy_EventReader(unsigned int debounceDelay, bool eventS
 	//for readEvent method
 	_lastBounceTime = 0; //ms; the last time the event state bounced (ie: the time stamp when the eventState last changed)
 	_eventStateOld = !eventStateWhenEventOccurs; //the previous event state; initialize as though no event was occurring last time 
-	_debouncedState = _EVENT_NOT_OCCURRING; //the current, actual, NOT bouncing event state; initialize as _EVENT_NOT_OCCURRING
+	_debouncedAction = NO_ACTION;
+  _debouncedState = _EVENT_NOT_OCCURRING; //the current, actual, NOT bouncing event state; initialize as _EVENT_NOT_OCCURRING
 	_debouncedStateOld = _EVENT_NOT_OCCURRING; //the previous, actual, NOT bouncing event state; initialize as _EVENT_NOT_OCCURRING, so that we start out looking for an ACTION_OCCURRED, NOT an ACTION_UNOCCURRED
 }
 
@@ -104,19 +105,18 @@ bool eRCaGuy_EventReader::getEventStateWhenEventOccurs()
 
 //------------------------------------------------------------------------------------------------------
 //readEvent
+//-Description below COPIED FROM THE .h FILE 
 /*
-Read the event action, and store it into the debouncedAction variable; and read the event state, & store it into the debouncedState variable
+Read the latest eventState, debounce it, and update _debouncedAction and _debouncedState as necessary
 -The event state can be 0 or 1
--event action indicates what just happened to the event: 
+-_debouncedAction indicates what just happened to the event: 
   0 = NO_ACTION: no change in true, debounced event state since last time interpreting the event, or debounceDelay time not yet elapsed <--*perhaps* in the future, output a 3 to indicate debounceDelay time not yet elapsed
   1 = ACTION_OCCURRED: a new event just occurred (debounceDelay had elapsed)
  -1 = ACTION_UNOCCURRED: event just "un-occurred" by going back to its resting state (debounceDelay had elapsed)
 */
 //------------------------------------------------------------------------------------------------------
-void eRCaGuy_EventReader::readEvent(bool eventState, int8_t *debouncedAction, boolean* debouncedState)
-{
-  int8_t action = NO_ACTION;
-  
+void eRCaGuy_EventReader::readEvent(bool eventState)
+{ 
   //0) Update _lastBounceTime each time a bounce occurs
   if (eventState != _eventStateOld) //check to see if the *bouncing* event state has changed
   {
@@ -132,21 +132,38 @@ void eRCaGuy_EventReader::readEvent(bool eventState, int8_t *debouncedAction, bo
     //2) Check to see if the *actual, NOT bouncing* event state has CHANGED
     if (_debouncedState != _debouncedStateOld) //if the actual, NOT bouncing event state has changed
     {
-      //3) Since we know that the event is real (debounced), and not noise (since the debounceDelay has occurred), and since we know the event state has CHANGED, meaning that the event isn't just sitting constant in an _EVENT_OCCURRING or _EVENT_NOT_OCCURRING *state*, let's check to see if the event action is ACTION_OCCURRED or ACTION_UNOCCURRED, then the user can act on the side of the action that he/she sees fit
+      //3) Since we know that the event is real (debounced), and not noise (since the debounceDelay has occurred), and since we know the event state has CHANGED, meaning that the event isn't just sitting constant in an _EVENT_OCCURRING or _EVENT_NOT_OCCURRING *state*, let's check to see if the event _debouncedAction is ACTION_OCCURRED or ACTION_UNOCCURRED, then the user can act on the side of the _debouncedAction that he/she sees fit
       if (_debouncedState==_EVENT_OCCURRING)
       {
-        action = ACTION_OCCURRED; //event action just took place (and debounceDelay had elapsed)
+        _debouncedAction = ACTION_OCCURRED; //event action just took place (and debounceDelay had elapsed)
       }
       else //_debouncedState==_EVENT_NOT_OCCURRING
       {
-        action = ACTION_UNOCCURRED; //event just went back to its normal, resting condition (and debounceDelay had elapsed)
+        _debouncedAction = ACTION_UNOCCURRED; //event just went back to its normal, resting condition (and debounceDelay had elapsed)
       }
     } //end of checking to see if the button state has CHANGED
     _debouncedStateOld = _debouncedState; //update the old button state
   } //end of Button debouncing
-  
-  //update the output variables, via the pointers passed in to the function
-  *debouncedAction = action;
-  *debouncedState = _debouncedState;
 }
+
+//------------------------------------------------------------------------------------------------------
+//getDebouncedAction
+//------------------------------------------------------------------------------------------------------
+int8_t eRCaGuy_EventReader::getDebouncedAction()
+{
+  int8_t action = _debouncedAction;
+  _debouncedAction = NO_ACTION; //reset, now that the most recent action is being read and acted upon 
+  return action;
+}
+
+//------------------------------------------------------------------------------------------------------
+//getDebouncedState
+//------------------------------------------------------------------------------------------------------
+bool eRCaGuy_EventReader::getDebouncedState()
+{
+  return _debouncedState;
+}
+
+
+
 

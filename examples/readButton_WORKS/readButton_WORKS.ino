@@ -67,11 +67,7 @@ void setup()
 }
 
 void loop() 
-{
-  //local variables
-  int8_t button_action; //see details below
-  boolean button_state; //see details below
-  
+{  
   //read button; use the ampersands (&) to pass the address to (pointers to) the variables as input parameters, so that the variables can be updated by the function
   //Details:
     //read the button action, and store it into the button_action variable; and read the button state, & store it into the button_state variable
@@ -81,29 +77,32 @@ void loop()
     //	1 = button was just pressed by a human operator (debounceDelay had elapsed)
     // -1 = button was just released by a human operator (debounceDelay had elapsed)
   byte buttonState = digitalRead(buttonPin);
-  button1.readEvent(buttonState, &button_action, &button_state);
+  button1.readEvent(buttonState);
+  
+  int8_t button_action = button1.getDebouncedAction();
+  boolean button_state = button1.getDebouncedState();
   
   //output data if a button press or release was detected, & toggle LED 13 on button *presses* only
   if (button_action != 0) //if an action has occurred on the button
   {
-    Serial.print("button_action = "); Serial.print(button_action); Serial.print(", "); 
+    Serial.print(F("button_action = ")); Serial.print(button_action); Serial.print(", "); 
     if (button_action==1)
     {
-      Serial.print("Button PRESS detected");
+      Serial.print(F("Button PRESS detected"));
     }
     else //button_action==-1
     {
-      Serial.print("Button RELEASE detected");
+      Serial.print(F("Button RELEASE detected"));
     }
-    Serial.print("; button_state = "); Serial.print(button_state); 
-    Serial.print(", "); 
+    Serial.print(F("; button_state = ")); Serial.print(button_state); 
+    Serial.print(F(", ")); 
     if (button_state==BUTTON_PRESSED)
     {
-      Serial.println("BUTTON_PRESSED");
+      Serial.println(F("BUTTON_PRESSED"));
     }
     else //button_state==BUTTON_NOT_PRESSED
     {
-      Serial.println("BUTTON_NOT_PRESSED");
+      Serial.println(F("BUTTON_NOT_PRESSED"));
     }
     
     //toggle the led on every button press
@@ -129,11 +128,11 @@ void loop()
      t_start = millis(); //ms; update
      if (button_state==BUTTON_PRESSED)
      {
-       Serial.println("button is being held down");
+       Serial.println(F("button is being held down"));
      }
      else //button_state==BUTTON_NOT_PRESSED
      {
-       Serial.println("button is just sitting there, NOT pressed");
+       Serial.println(F("button is just sitting there, NOT pressed"));
      }
    }
  }

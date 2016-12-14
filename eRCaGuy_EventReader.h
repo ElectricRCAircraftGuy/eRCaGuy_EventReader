@@ -17,9 +17,10 @@ ButtonReader Library webpage: http://www.electricrcaircraftguy.com/2014/05/ercag
  EventReader Last Updated: 13 Dec 2016 
  
  Version History (newest on top):
- 20161213 - v2.0.0 released (first version now called eRCaGuy_EventReader instead of eRCaGuy_ButtonReader); this is a major overhaul and upgrade! This version is now capable of debouncing *any* event instead of just digitalRead inputs on buttons. This means that you can interpret and debounce capacitive touch buttons, or ladders of buttons read as different voltage values on a single analog pin, for instance. This is now possible because instead of letting the library read the button via digitalRead, you just pass in the current button or event state as a 0 or 1 to the library, via the "readEvent" method, and let it interpret and debounce it for you. 
- 20141031 - v1.1 release; fixed major bug in eRCaGuy_ButtonReader which prevented reading multiple buttons simultaneously from working
- 20140531 - v1.0 release; first release of eRCaGuy_ButtonReader
+  - 20161213 - v2.1.0 released; I am now storing _debouncedAction and _debouncedState right inside the objects! getDebouncedAction() and getDebouncedState() method added. It is no longer necessary to keep track of these outside of the library anymore!
+  - 20161213 - v2.0.0 released (first version now called eRCaGuy_EventReader instead of eRCaGuy_ButtonReader); this is a major overhaul and upgrade! This version is now capable of debouncing *any* event instead of just digitalRead inputs on buttons. This means that you can interpret and debounce capacitive touch buttons, or ladders of buttons read as different voltage values on a single analog pin, for instance. This is now possible because instead of letting the library read the button via digitalRead, you just pass in the current button or event state as a 0 or 1 to the library, via the "readEvent" method, and let it interpret and debounce it for you. 
+  - 20141031 - v1.1 release; fixed major bug in eRCaGuy_ButtonReader which prevented reading multiple buttons simultaneously from working
+  - 20140531 - v1.0 release; first release of eRCaGuy_ButtonReader
  
  Credits:
  1) This file was created and edited in Notepad++ (http://notepad-plus-plus.org/)
@@ -89,14 +90,18 @@ class eRCaGuy_EventReader
     bool getEventStateWhenEventOccurs();
 		
 		/*
-    Read the event action, and store it into the debouncedAction variable; and read the event state, & store it into the debouncedState variable
+    Read the latest eventState, debounce it, and update _debouncedAction and _debouncedState as necessary
 		-The event state can be 0 or 1
-		-event action indicates what just happened to the event: 
+		-_debouncedAction indicates what just happened to the event: 
 		  0 = NO_ACTION: no change in true, debounced event state since last time interpreting the event, or debounceDelay time not yet elapsed <--*perhaps* in the future, output a 3 to indicate debounceDelay time not yet elapsed
 		  1 = ACTION_OCCURRED: a new event just occurred (debounceDelay had elapsed)
 	   -1 = ACTION_UNOCCURRED: event just "un-occurred" by going back to its resting state (debounceDelay had elapsed)
 		*/
-    void readEvent(bool eventState, int8_t *debouncedAction, boolean *debouncedState);
+    void readEvent(bool eventState);
+    
+    //get debounced values 
+    int8_t getDebouncedAction();
+    bool getDebouncedState();
     
 		//Public class constants to define ACTIONS (defined in .cpp file)
 		static const int8_t NO_ACTION, ACTION_OCCURRED, ACTION_UNOCCURRED;
@@ -112,6 +117,7 @@ class eRCaGuy_EventReader
 		//for readEvent method
 		unsigned long _lastBounceTime;
 		unsigned int _eventStateOld;
+    int8_t _debouncedAction;
 		boolean _debouncedState;
 		boolean _debouncedStateOld;
 };
