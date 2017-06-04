@@ -1,9 +1,11 @@
-## Readme for eRCaGuy_ButtonReader  
+## Readme for ~eRCaGuy_ButtonReader~ eRCaGuyEventReader  
 By Gabriel Staples  
 Readme Written: 31 May 2014  
 Readme Last updated: 13 Dec 2016
 
-# SEE HEADER FILE FOR NEW INFO AND DETAILS
+# SEE HEADER FILE FOR NEW INFO AND DETAILS. This library replaces [eRCaGuy_ButtonReader](https://github.com/ElectricRCAircraftGuy/eRCaGuy_ButtonReader).
+
+## TODO: create more examples to demonstrate how to use eRCaGuyEventReader, and update this readme and all links herein.  
 
 ================
 
