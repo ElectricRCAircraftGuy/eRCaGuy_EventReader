@@ -24,7 +24,7 @@ Description:
 --Whenever the button is pressed it will toggle LED 13 on or off
 
 Circuit:
--Connect a button from digital pin 5 to GND
+-Connect a button from digital pin 8 to GND
 --the internal pull-up resistor is enabled on pin 5 to protect the pin from over-current
 
 Instructions:
@@ -54,7 +54,7 @@ void setup()
   Serial.println(F("demo"));
   
   //configure pins
-  pinMode(buttonPin, INPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
   pinMode(ledPin, OUTPUT);
 
   // set initial LED state to OFF
