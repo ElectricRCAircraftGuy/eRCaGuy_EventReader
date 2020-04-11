@@ -25,11 +25,11 @@ ButtonReader Library webpage: http://www.electricrcaircraftguy.com/2014/05/ercag
  Credits:
  1) This file was created and edited in Notepad++ (http://notepad-plus-plus.org/)
  2) The core of my debouncing algorithm is based on the Arduino "Debounce" example (which is a very thorough and well-written debounce
-	by the way)	here:  http://arduino.cc/en/Tutorial/Debounce
-	-The history of the above example, in order to properly thank and give credit to these people, is:
-		-created 21 November 2006 by David A. Mellis
-		-modified 30 Aug 2011 by Limor Fried (LadyAda)
-		-modified 28 Dec 2012 by Mike Walters
+    by the way) here:  http://arduino.cc/en/Tutorial/Debounce
+    -The history of the above example, in order to properly thank and give credit to these people, is:
+      -created 21 November 2006 by David A. Mellis
+      -modified 30 Aug 2011 by Limor Fried (LadyAda)
+      -modified 28 Dec 2012 by Mike Walters
 */
 
 /*
@@ -75,51 +75,54 @@ class eRCaGuy_EventReader
   public:
     //declare class constructor method
     eRCaGuy_EventReader(unsigned int debounceDelay = 50, bool eventStateWhenEventOccurs = 1); //default debounceDelay, if not specified, is this value here 
-	
-		//set functions 
-		
-		//set the debounceDelay time (in ms)
-		void setDebounceDelay(unsigned int debounceDelay = 50); //default is 50ms
-		//set whether the event is considered to be occurring when the state is HIGH (1) or LOW (0)
-		void setEventStateWhenEventOccurs(bool eventStateWhenEventOccurs = 1);
+  
+    //set functions 
+    
+    //set the debounceDelay time (in ms)
+    void setDebounceDelay(unsigned int debounceDelay = 50); //default is 50ms
+    //set whether the event is considered to be occurring when the state is HIGH (1) or LOW (0)
+    void setEventStateWhenEventOccurs(bool eventStateWhenEventOccurs = 1);
     
     //get functions 
     
-		//get the current debounceDelay value 
-		unsigned int getDebounceDelay();
+    //get the current debounceDelay value 
+    unsigned int getDebounceDelay();
     bool getEventStateWhenEventOccurs();
-		
-		/*
+    
+    /*
     Read the latest eventState, debounce it, and update _debouncedAction and _debouncedState as necessary
-		-The event state can be 0 or 1
-		-_debouncedAction indicates what just happened to the event: 
-		  0 = NO_ACTION: no change in true, debounced event state since last time interpreting the event, or debounceDelay time not yet elapsed <--*perhaps* in the future, output a 3 to indicate debounceDelay time not yet elapsed
-		  1 = ACTION_OCCURRED: a new event just occurred (debounceDelay had elapsed)
-	   -1 = ACTION_UNOCCURRED: event just "un-occurred" by going back to its resting state (debounceDelay had elapsed)
-		*/
+    -The event state can be 0 or 1
+    -_debouncedAction indicates what just happened to the event: 
+      0 = NO_ACTION: no change in true, debounced event state since last time interpreting the event, or debounceDelay time not yet elapsed <--*perhaps* in the future, output a 3 to indicate debounceDelay time not yet elapsed
+      1 = ACTION_OCCURRED: a new event just occurred (debounceDelay had elapsed)
+     -1 = ACTION_UNOCCURRED: event just "un-occurred" by going back to its resting state (debounceDelay had elapsed)
+    */
     void readEvent(bool eventState);
     
     //get debounced values 
     int8_t getDebouncedAction();
     bool getDebouncedState();
     
-		//Public class constants to define ACTIONS (defined in .cpp file)
-		static const int8_t NO_ACTION, ACTION_OCCURRED, ACTION_UNOCCURRED;
-    
+    //Public class constants to define ACTIONS
+    //define class constants
+    static constexpr int8_t eRCaGuy_EventReader::NO_ACTION = 0;
+    static constexpr int8_t eRCaGuy_EventReader::ACTION_OCCURRED = 1;
+    static constexpr int8_t eRCaGuy_EventReader::ACTION_UNOCCURRED = -1;
+
   private:
-		//declare private class methods (functions)
-		//N/A
-	  //variables accessible by this class only
-		unsigned int _debounceDelay;
+    //declare private class methods (functions)
+    //N/A
+    //variables accessible by this class only
+    unsigned int _debounceDelay;
     //Event states:
-		bool _EVENT_OCCURRING;
-		bool _EVENT_NOT_OCCURRING;
-		//for readEvent method
-		unsigned long _lastBounceTime;
-		unsigned int _eventStateOld;
+    bool _EVENT_OCCURRING;
+    bool _EVENT_NOT_OCCURRING;
+    //for readEvent method
+    unsigned long _lastBounceTime;
+    unsigned int _eventStateOld;
     int8_t _debouncedAction;
-		boolean _debouncedState;
-		boolean _debouncedStateOld;
+    boolean _debouncedState;
+    boolean _debouncedStateOld;
 };
 
 #endif

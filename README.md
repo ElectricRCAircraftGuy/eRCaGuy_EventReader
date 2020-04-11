@@ -1,3 +1,13 @@
+# Status
+
+Update from 11 Apr. 2020:
+
+The algorithm is sound, but the code could use a good cleaning and some unit tests since I'm much more skilled now. Nevertheless, it does work, so use it.
+
+The only functional example right now may be **debounce_event_USE_THIS_EXAMPLE**, so use this example!  
+
+See also my answer on Stack Overflow here: https://stackoverflow.com/questions/60850806/how-to-debounce-a-bitmask-readings-with-arduino-not-buttons/61153060#61153060.
+
 ## Readme for ~eRCaGuy_ButtonReader~ eRCaGuyEventReader  
 By Gabriel Staples  
 Readme Written: 31 May 2014  

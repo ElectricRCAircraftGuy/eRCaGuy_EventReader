@@ -44,25 +44,20 @@ References:
 
 #include "eRCaGuy_EventReader.h"
 
-//define class constants
-const int8_t eRCaGuy_EventReader::NO_ACTION = 0;
-const int8_t eRCaGuy_EventReader::ACTION_OCCURRED = 1;
-const int8_t eRCaGuy_EventReader::ACTION_UNOCCURRED = -1;
-
 //define class constructor method
 eRCaGuy_EventReader::eRCaGuy_EventReader(unsigned int debounceDelay, bool eventStateWhenEventOccurs)
 {
   //initialize _EVENT_OCCURRING and _EVENT_NOT_OCCURRING member variables
   setEventStateWhenEventOccurs(eventStateWhenEventOccurs);
-	
+  
   //initialize member variables
   _debounceDelay = debounceDelay;
-	//for readEvent method
-	_lastBounceTime = 0; //ms; the last time the event state bounced (ie: the time stamp when the eventState last changed)
-	_eventStateOld = !eventStateWhenEventOccurs; //the previous event state; initialize as though no event was occurring last time 
-	_debouncedAction = NO_ACTION;
+  //for readEvent method
+  _lastBounceTime = 0; //ms; the last time the event state bounced (ie: the time stamp when the eventState last changed)
+  _eventStateOld = !eventStateWhenEventOccurs; //the previous event state; initialize as though no event was occurring last time 
+  _debouncedAction = NO_ACTION;
   _debouncedState = _EVENT_NOT_OCCURRING; //the current, actual, NOT bouncing event state; initialize as _EVENT_NOT_OCCURRING
-	_debouncedStateOld = _EVENT_NOT_OCCURRING; //the previous, actual, NOT bouncing event state; initialize as _EVENT_NOT_OCCURRING, so that we start out looking for an ACTION_OCCURRED, NOT an ACTION_UNOCCURRED
+  _debouncedStateOld = _EVENT_NOT_OCCURRING; //the previous, actual, NOT bouncing event state; initialize as _EVENT_NOT_OCCURRING, so that we start out looking for an ACTION_OCCURRED, NOT an ACTION_UNOCCURRED
 }
 
 //define other class methods (functions)
