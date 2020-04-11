@@ -105,9 +105,9 @@ class eRCaGuy_EventReader
     
     //Public class constants to define ACTIONS
     //define class constants
-    static constexpr int8_t eRCaGuy_EventReader::NO_ACTION = 0;
-    static constexpr int8_t eRCaGuy_EventReader::ACTION_OCCURRED = 1;
-    static constexpr int8_t eRCaGuy_EventReader::ACTION_UNOCCURRED = -1;
+    static constexpr int8_t NO_ACTION = 0;
+    static constexpr int8_t ACTION_OCCURRED = 1;
+    static constexpr int8_t ACTION_UNOCCURRED = -1;
 
   private:
     //declare private class methods (functions)
