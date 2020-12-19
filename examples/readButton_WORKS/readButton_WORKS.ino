@@ -25,7 +25,7 @@ Description:
 
 Circuit:
 -Connect a button from digital pin 8 to GND
---the internal pull-up resistor is enabled on pin 5 to protect the pin from over-current
+--the internal pull-up resistor is enabled on this pin to protect the pin from over-current
 
 Instructions:
 Upload the code, open the serial monitor, and play around pressing, releasing, and holding down the button, to see what happens!
